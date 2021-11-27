@@ -71,7 +71,13 @@ def static_metr(z, starting_theta, likelihood_fn,
         # print(str(theta_star)+', '+str(hyper_params))
         prior_star = prior_fn(theta_star, hyper_params)
         if prior_star != -np.inf:
-                likelihood_star = likelihood_fn(z, theta_star, *argv)
+                try:
+                    likelihood_star = likelihood_fn(z, theta_star, *argv)
+                except  np.linalg.LinAlgError:
+                    theta_star = theta + sigma_m * random_generator.standard_normal(p) @ prop_C
+                    likelihood_star = likelihood_fn(z, theta_star, *argv)
+                    prior_star = prior_fn(theta_star, hyper_params)
+                
       
                 if np.isnan(likelihood_star): likelihood_star = -np.inf
                 with np.errstate(over='raise'):
