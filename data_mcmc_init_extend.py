@@ -602,8 +602,8 @@ if __name__ == "__main__":
                beta_shape_trace[:,index] = beta_shape
                sigma_sbeta_loc0_trace[:,index] = np.array([sigma_loc0,sbeta_loc0])
                sigma_sbeta_loc1_trace[:,index] = np.array([sigma_loc1,sbeta_loc1])
-               sigma_sbeta_scale_trace[:,index] = np.array([sigma_scale[0],sbeta_scale])
-               sigma_sbeta_shape_trace[:,index] = np.array([sigma_shape[0],sbeta_shape])
+               sigma_sbeta_scale_trace[:,index] = np.array([sigma_scale,sbeta_scale])
+               sigma_sbeta_shape_trace[:,index] = np.array([sigma_shape,sbeta_shape])
                
                mu_loc0_trace[index] = mu_loc0
                mu_loc1_trace[index] = mu_loc1
