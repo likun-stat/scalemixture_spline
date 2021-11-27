@@ -462,6 +462,45 @@ if __name__ == "__main__":
                    Cor_Z_clusters.append(Cor_tmp)
                    inv_Z_cluster.append(cholesky_inv)
            
+           # Update loc0
+           for cluster_num in np.arange(n_clusters):
+               loc0_accept[cluster_num] += utils.update_loc0_GEV_one_cluster_interp(loc0, Cluster_which, cluster_num, sigma_loc0, inv_loc0_cluster_proposal,
+                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            loc1, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above, loc0_mean,
+                                                                            sigma_m_loc0_cluster[cluster_num], random_generator)
+           loc0_within_thinning[:, index_within] = loc0
+           
+           # Update loc1
+           for cluster_num in np.arange(n_clusters):
+               loc1_accept[cluster_num] += utils.update_loc1_GEV_one_cluster_interp(loc1, Cluster_which, cluster_num, sigma_loc1, inv_loc1_cluster_proposal,
+                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            loc0, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above, loc1_mean,
+                                                                            sigma_m_loc1_cluster[cluster_num], random_generator)
+           loc1_within_thinning[:, index_within] = loc1
+           Loc = np.tile(loc0, n_t) + np.tile(loc1, n_t)*np.repeat(Time,n_s)
+           Loc = Loc.reshape((n_s,n_t),order='F')
+           
+           # Update scale
+           for cluster_num in np.arange(n_clusters):
+               scale_accept[cluster_num] += utils.update_scale_GEV_one_cluster_interp(scale, Cluster_which, cluster_num, sigma_scale, inv_scale_cluster_proposal,
+                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            Loc, Shape, Time, xp, den_p, thresh_X, thresh_X_above, scale_mean,
+                                                                            sigma_m_scale_cluster[cluster_num], random_generator)
+           scale_within_thinning[:, index_within] = np.log(scale)
+           Scale = np.tile(scale, n_t)
+           Scale = Scale.reshape((n_s,n_t),order='F')
+            
+            
+           # Update shape
+           for cluster_num in np.arange(n_clusters):
+               shape_accept[cluster_num] += utils.update_shape_GEV_one_cluster_interp(shape, Cluster_which, cluster_num, sigma_shape, inv_shape_cluster_proposal,
+                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            Loc, Scale, Time, xp, den_p, thresh_X, thresh_X_above, shape_mean,
+                                                                            sigma_m_shape_cluster[cluster_num], random_generator)
+           shape_within_thinning[:, index_within] = shape
+           Shape = np.tile(shape, n_t)
+           Shape = Shape.reshape((n_s,n_t),order='F')
+          
            # Update mu_loc0 and beta_loc0
            mu_loc0 = norm.rvs(loc = np.mean(loc0 - Design_mat @beta_loc0), scale = np.sqrt(sigma_loc0/n_s))
            
@@ -520,47 +559,7 @@ if __name__ == "__main__":
            sigma_shape = invgamma.rvs(517,loc=0, scale=sum((shape-shape_mean)**2)/2, size=1)
            sbeta_shape = invgamma.rvs(49,loc=0, scale=sum(beta_shape[0:97]**2)/2+0.5, size=1)
            D_sigma_shape_inv = np.concatenate((np.repeat(1/sbeta_shape,97), np.repeat(0.0025,2)))
-           
-            
-           # Update loc0
-           for cluster_num in np.arange(n_clusters):
-               loc0_accept[cluster_num] += utils.update_loc0_GEV_one_cluster_interp(loc0, Cluster_which, cluster_num, sigma_loc0, inv_loc0_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            loc1, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above, loc0_mean,
-                                                                            sigma_m_loc0_cluster[cluster_num], random_generator)
-           loc0_within_thinning[:, index_within] = loc0
-           
-           # Update loc1
-           for cluster_num in np.arange(n_clusters):
-               loc1_accept[cluster_num] += utils.update_loc1_GEV_one_cluster_interp(loc1, Cluster_which, cluster_num, sigma_loc1, inv_loc1_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            loc0, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above, loc1_mean,
-                                                                            sigma_m_loc1_cluster[cluster_num], random_generator)
-           loc1_within_thinning[:, index_within] = loc1
-           Loc = np.tile(loc0, n_t) + np.tile(loc1, n_t)*np.repeat(Time,n_s)
-           Loc = Loc.reshape((n_s,n_t),order='F')
-           
-           # Update scale
-           for cluster_num in np.arange(n_clusters):
-               scale_accept[cluster_num] += utils.update_scale_GEV_one_cluster_interp(scale, Cluster_which, cluster_num, sigma_scale, inv_scale_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            Loc, Shape, Time, xp, den_p, thresh_X, thresh_X_above, scale_mean,
-                                                                            sigma_m_scale_cluster[cluster_num], random_generator)
-           scale_within_thinning[:, index_within] = np.log(scale)
-           Scale = np.tile(scale, n_t)
-           Scale = Scale.reshape((n_s,n_t),order='F')
-            
-            
-           # Update shape
-           for cluster_num in np.arange(n_clusters):
-               shape_accept[cluster_num] += utils.update_shape_GEV_one_cluster_interp(shape, Cluster_which, cluster_num, sigma_shape, inv_shape_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            Loc, Scale, Time, xp, den_p, thresh_X, thresh_X_above, shape_mean,
-                                                                            sigma_m_shape_cluster[cluster_num], random_generator)
-           shape_within_thinning[:, index_within] = shape
-           Shape = np.tile(shape, n_t)
-           Shape = Shape.reshape((n_s,n_t),order='F')
-          
+                                  
            # cen[:] = utils.which_censored(Y, Loc, Scale, Shape, prob_below)
            # cen_above[:] = utils.which_censored(Y, Loc, Scale, Shape, prob_above)
            
