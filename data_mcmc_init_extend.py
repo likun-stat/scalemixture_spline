@@ -474,7 +474,8 @@ if __name__ == "__main__":
            # Update sigma_loc0 and sbeta_loc0
            sigma_loc0 = invgamma.rvs(517,loc=0, scale=sum((loc0-loc0_mean)**2)/2, size=1)
            sbeta_loc0 = invgamma.rvs(49,loc=0, scale=sum(beta_loc0[0:97]**2)/2+0.5, size=1)
-          
+           D_sigma_loc0_inv = np.concatenate((np.repeat(1/sbeta_loc0,97), np.repeat(0.0025,2)))
+           
            
            # Update mu_loc1 and beta_loc1
            mu_loc1 = norm.rvs(loc = np.mean(loc1 - Design_mat @beta_loc1), scale = np.sqrt(sigma_loc1/n_s))
@@ -488,6 +489,7 @@ if __name__ == "__main__":
            # Update sigma_loc1 and sbeta_loc1
            sigma_loc1 = invgamma.rvs(517,loc=0, scale=sum((loc1-loc1_mean)**2)/2, size=1)
            sbeta_loc1 = invgamma.rvs(49,loc=0, scale=sum(beta_loc1[0:97]**2)/2+0.5, size=1)
+           D_sigma_loc1_inv = np.concatenate((np.repeat(1/sbeta_loc1,97), np.repeat(0.0025,2)))
            
            
            # Update mu_scale and beta_scale
@@ -502,6 +504,7 @@ if __name__ == "__main__":
            # Update sigma_scale and sbeta_scale
            sigma_scale = invgamma.rvs(517,loc=0, scale=sum((np.log(scale)-scale_mean)**2)/2, size=1)
            sbeta_scale = invgamma.rvs(49,loc=0, scale=sum(beta_scale[0:97]**2)/2+0.5, size=1)
+           D_sigma_scale_inv = np.concatenate((np.repeat(1/sbeta_scale,97), np.repeat(0.0025,2)))
            
            
            # Update mu_shape and beta_shape
@@ -516,7 +519,8 @@ if __name__ == "__main__":
            # Update sigma_shape and sbeta_shape
            sigma_shape = invgamma.rvs(517,loc=0, scale=sum((shape-shape_mean)**2)/2, size=1)
            sbeta_shape = invgamma.rvs(49,loc=0, scale=sum(beta_shape[0:97]**2)/2+0.5, size=1)
-          
+           D_sigma_shape_inv = np.concatenate((np.repeat(1/sbeta_shape,97), np.repeat(0.0025,2)))
+           
             
            # Update loc0
            for cluster_num in np.arange(n_clusters):
