@@ -504,60 +504,60 @@ if __name__ == "__main__":
            # Update mu_loc0 and beta_loc0
            mu_loc0 = norm.rvs(loc = np.mean(loc0 - Design_mat @beta_loc0), scale = np.sqrt(sigma_loc0/n_s))
            
-           beta_tmp = Design_mat.T @(loc0 - mu_loc0) + norm.rvs(size=99)
-           new_inv_loc0 = np.linalg.inv(D_sigma_loc0_inv + XtX/sigma_loc0)
-           beta_loc0 = new_inv_loc0 @ beta_tmp
+           new_L_loc0 = np.linalg.cholesky(D_sigma_loc0_inv + XtX/sigma_loc0)  
+           beta_tmp = np.linalg.solve(new_L_loc0, Design_mat.T @(loc0 - mu_loc0)) + norm.rvs(size=99)
+           beta_loc0 = np.linalg.solve(new_L_loc0.T, beta_tmp)
            
            loc0_mean = mu_loc0+Design_mat @beta_loc0
            
            # Update sigma_loc0 and sbeta_loc0
-           # sigma_loc0 = invgamma.rvs(517,loc=0, scale=sum((loc0-loc0_mean)**2)/2, size=1)
-           # sbeta_loc0 = invgamma.rvs(49,loc=0, scale=sum(beta_loc0[0:97]**2)/2+0.5, size=1)
+           # sigma_loc0 = invgamma.rvs(2517,loc=0, scale=sum((loc0-loc0_mean)**2)/2, size=1)
+           # sbeta_loc0 = invgamma.rvs(2049,loc=0, scale=sum(beta_loc0[0:97]**2)/2+0.5, size=1)
            D_sigma_loc0_inv = np.concatenate((np.repeat(1/sbeta_loc0,97), np.repeat(0.0025,2)))
            
            
            # Update mu_loc1 and beta_loc1
            mu_loc1 = norm.rvs(loc = np.mean(loc1 - Design_mat @beta_loc1), scale = np.sqrt(sigma_loc1/n_s))
            
-           beta_tmp = Design_mat.T @(loc1 - mu_loc1) + norm.rvs(size=99)
-           new_inv_loc1 = np.linalg.inv(D_sigma_loc1_inv + XtX/sigma_loc1)
-           beta_loc1 = new_inv_loc1 @ beta_tmp
+           new_L_loc1 = np.linalg.cholesky(D_sigma_loc1_inv + XtX/sigma_loc1)  
+           beta_tmp = np.linalg.solve(new_L_loc1, Design_mat.T @(loc1 - mu_loc1)) + norm.rvs(size=99)
+           beta_loc1 = np.linalg.solve(new_L_loc1.T, beta_tmp)
            
            loc1_mean = mu_loc1+Design_mat @beta_loc1
            
            # Update sigma_loc1 and sbeta_loc1
-           # sigma_loc1 = invgamma.rvs(517,loc=0, scale=sum((loc1-loc1_mean)**2)/2, size=1)
-           # sbeta_loc1 = invgamma.rvs(49,loc=0, scale=sum(beta_loc1[0:97]**2)/2+0.5, size=1)
+           # sigma_loc1 = invgamma.rvs(2517,loc=0, scale=sum((loc1-loc1_mean)**2)/2, size=1)
+           # sbeta_loc1 = invgamma.rvs(2049,loc=0, scale=sum(beta_loc1[0:97]**2)/2+0.5, size=1)
            D_sigma_loc1_inv = np.concatenate((np.repeat(1/sbeta_loc1,97), np.repeat(0.0025,2)))
            
            
            # Update mu_scale and beta_scale
            mu_scale = norm.rvs(loc = np.mean(np.log(scale) - Design_mat @beta_scale), scale = np.sqrt(sigma_scale/n_s))
            
-           beta_tmp = Design_mat.T @(np.log(scale) - mu_scale) + norm.rvs(size=99)
-           new_inv_scale = np.linalg.inv(D_sigma_scale_inv + XtX/sigma_scale)
-           beta_scale = new_inv_scale @ beta_tmp
+           new_L_scale = np.linalg.cholesky(D_sigma_scale_inv + XtX/sigma_scale)  
+           beta_tmp = np.linalg.solve(new_L_scale, Design_mat.T @(scale - mu_scale)) + norm.rvs(size=99)
+           beta_scale = np.linalg.solve(new_L_scale.T, beta_tmp)
            
            scale_mean = mu_scale+Design_mat @beta_scale
            
            # Update sigma_scale and sbeta_scale
-           # sigma_scale = invgamma.rvs(517,loc=0, scale=sum((np.log(scale)-scale_mean)**2)/2, size=1)
-           # sbeta_scale = invgamma.rvs(49,loc=0, scale=sum(beta_scale[0:97]**2)/2+0.5, size=1)
+           # sigma_scale = invgamma.rvs(2517,loc=0, scale=sum((np.log(scale)-scale_mean)**2)/2, size=1)
+           # sbeta_scale = invgamma.rvs(2049,loc=0, scale=sum(beta_scale[0:97]**2)/2+0.5, size=1)
            D_sigma_scale_inv = np.concatenate((np.repeat(1/sbeta_scale,97), np.repeat(0.0025,2)))
            
            
            # Update mu_shape and beta_shape
            mu_shape = norm.rvs(loc = np.mean(shape - Design_mat @beta_shape), scale = np.sqrt(sigma_shape/n_s))
            
-           beta_tmp = Design_mat.T @(shape - mu_shape) + norm.rvs(size=99)
-           new_inv_shape = np.linalg.inv(D_sigma_shape_inv + XtX/sigma_shape)
-           beta_shape = new_inv_shape @ beta_tmp
+           new_L_shape = np.linalg.cholesky(D_sigma_shape_inv + XtX/sigma_shape)  
+           beta_tmp = np.linalg.solve(new_L_shape, Design_mat.T @(shape - mu_shape)) + norm.rvs(size=99)
+           beta_shape = np.linalg.solve(new_L_shape.T, beta_tmp)
            
            shape_mean = mu_shape+Design_mat @beta_shape
             
            # Update sigma_shape and sbeta_shape
-           # sigma_shape = invgamma.rvs(517,loc=0, scale=sum((shape-shape_mean)**2)/2, size=1)
-           # sbeta_shape = invgamma.rvs(49,loc=0, scale=sum(beta_shape[0:97]**2)/2+0.5, size=1)
+           # sigma_shape = invgamma.rvs(2517,loc=0, scale=sum((shape-shape_mean)**2)/2, size=1)
+           # sbeta_shape = invgamma.rvs(2049,loc=0, scale=sum(beta_shape[0:97]**2)/2+0.5, size=1)
            D_sigma_shape_inv = np.concatenate((np.repeat(1/sbeta_shape,97), np.repeat(0.0025,2)))
                                   
            # cen[:] = utils.which_censored(Y, Loc, Scale, Shape, prob_below)

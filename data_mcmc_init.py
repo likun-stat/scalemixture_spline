@@ -41,7 +41,7 @@ if __name__ == "__main__":
    from pickle import dump
    from scipy.stats import norm
    from scipy.stats import invgamma  
-   # from scipy.linalg import lapack
+   # from scipy.linalg import cholesky
    
    # Check whether the 'mpi4py' is installed
    test_mpi = os.system("python -c 'from mpi4py import *' &> /dev/null")
@@ -450,9 +450,9 @@ if __name__ == "__main__":
            # Update mu_loc0 and beta_loc0
            mu_loc0 = norm.rvs(loc = np.mean(loc0 - Design_mat @beta_loc0), scale = np.sqrt(sigma_loc0/n_s))
            
-           beta_tmp = Design_mat.T @(loc0 - mu_loc0) + norm.rvs(size=99)
-           new_inv_loc0 = np.linalg.inv(D_sigma_loc0_inv + XtX/sigma_loc0)
-           beta_loc0 = new_inv_loc0 @ beta_tmp
+           new_L_loc0 = np.linalg.cholesky(D_sigma_loc0_inv + XtX/sigma_loc0)  
+           beta_tmp = np.linalg.solve(new_L_loc0, Design_mat.T @(loc0 - mu_loc0)) + norm.rvs(size=99)
+           beta_loc0 = np.linalg.solve(new_L_loc0.T, beta_tmp)
            
            loc0_mean = mu_loc0+Design_mat @beta_loc0
            
@@ -465,9 +465,9 @@ if __name__ == "__main__":
            # Update mu_loc1 and beta_loc1
            mu_loc1 = norm.rvs(loc = np.mean(loc1 - Design_mat @beta_loc1), scale = np.sqrt(sigma_loc1/n_s))
            
-           beta_tmp = Design_mat.T @(loc1 - mu_loc1) + norm.rvs(size=99)
-           new_inv_loc1 = np.linalg.inv(D_sigma_loc1_inv + XtX/sigma_loc1)
-           beta_loc1 = new_inv_loc1 @ beta_tmp
+           new_L_loc1 = np.linalg.cholesky(D_sigma_loc1_inv + XtX/sigma_loc1)  
+           beta_tmp = np.linalg.solve(new_L_loc1, Design_mat.T @(loc1 - mu_loc1)) + norm.rvs(size=99)
+           beta_loc1 = np.linalg.solve(new_L_loc1.T, beta_tmp)
            
            loc1_mean = mu_loc1+Design_mat @beta_loc1
            
@@ -480,9 +480,9 @@ if __name__ == "__main__":
            # Update mu_scale and beta_scale
            mu_scale = norm.rvs(loc = np.mean(np.log(scale) - Design_mat @beta_scale), scale = np.sqrt(sigma_scale/n_s))
            
-           beta_tmp = Design_mat.T @(np.log(scale) - mu_scale) + norm.rvs(size=99)
-           new_inv_scale = np.linalg.inv(D_sigma_scale_inv + XtX/sigma_scale)
-           beta_scale = new_inv_scale @ beta_tmp
+           new_L_scale = np.linalg.cholesky(D_sigma_scale_inv + XtX/sigma_scale)  
+           beta_tmp = np.linalg.solve(new_L_scale, Design_mat.T @(scale - mu_scale)) + norm.rvs(size=99)
+           beta_scale = np.linalg.solve(new_L_scale.T, beta_tmp)
            
            scale_mean = mu_scale+Design_mat @beta_scale
            
@@ -495,9 +495,9 @@ if __name__ == "__main__":
            # Update mu_shape and beta_shape
            mu_shape = norm.rvs(loc = np.mean(shape - Design_mat @beta_shape), scale = np.sqrt(sigma_shape/n_s))
            
-           beta_tmp = Design_mat.T @(shape - mu_shape) + norm.rvs(size=99)
-           new_inv_shape = np.linalg.inv(D_sigma_shape_inv + XtX/sigma_shape)
-           beta_shape = new_inv_shape @ beta_tmp
+           new_L_shape = np.linalg.cholesky(D_sigma_shape_inv + XtX/sigma_shape)  
+           beta_tmp = np.linalg.solve(new_L_shape, Design_mat.T @(shape - mu_shape)) + norm.rvs(size=99)
+           beta_shape = np.linalg.solve(new_L_shape.T, beta_tmp)
            
            shape_mean = mu_shape+Design_mat @beta_shape
             
