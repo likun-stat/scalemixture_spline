@@ -1998,7 +1998,7 @@ def update_beta_scale_GEV_one_cluster_interp(beta_scale, Cluster_which, cluster_
     accept = 0
     
     # 2. Propose parameters
-    tmp_parmas_star = np.matmul(np.linalg.inv(inv_scale_cluster_proposal[cluster_num][0].T) , np.log(current_params)) + lambda_current_cluster*random_generator.standard_normal(n_current_cluster)
+    tmp_parmas_star = np.matmul(np.linalg.inv(inv_scale_cluster_proposal[cluster_num][0].T) , current_params) + lambda_current_cluster*random_generator.standard_normal(n_current_cluster)
     params_star = np.matmul(inv_scale_cluster_proposal[cluster_num][0].T , tmp_parmas_star)
     
     # plt.plot(np.arange(n_current_cluster), current_params, np.arange(n_current_cluster),params_star)
