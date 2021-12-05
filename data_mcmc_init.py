@@ -39,8 +39,8 @@ if __name__ == "__main__":
    from matplotlib.backends.backend_pdf import PdfPages
    from pickle import load
    from pickle import dump
-   from scipy.stats import norm
-   from scipy.stats import invgamma  
+   # from scipy.stats import norm
+   # from scipy.stats import invgamma  
    from scipy.linalg import cholesky
    
    # Check whether the 'mpi4py' is installed
@@ -65,10 +65,10 @@ if __name__ == "__main__":
      initial_values = load(f)
      sigma_m = load(f)
      prop_sigma = load(f)
-     sigma_m_loc0_cluster = load(f)
-     sigma_m_loc1_cluster = load(f)
-     sigma_m_scale_cluster = load(f)
-     sigma_m_shape_cluster = load(f)
+     sigma_m_beta_loc0_cluster = load(f)
+     sigma_m_beta_loc1_cluster = load(f)
+     sigma_m_beta_scale_cluster = load(f)
+     sigma_m_beta_shape_cluster = load(f)
      sigma_m_Z_cluster = load(f)
      f.close()
      
@@ -96,6 +96,15 @@ if __name__ == "__main__":
    hyper_params_theta_c_scale = np.array([0, 20])
    hyper_params_theta_c_shape = np.array([0, 20])
    
+   hyper_params_mu_loc0 = np.array([-100,100])
+   hyper_params_mu_loc1 = np.array([-100,100])
+   hyper_params_mu_scale = np.array([-100,100])
+   hyper_params_mu_shape = np.array([-100,100])
+   
+   hyper_params_sbeta_loc0 = 1
+   hyper_params_sbeta_loc1 = 1
+   hyper_params_sbeta_scale = 1
+   hyper_params_sbeta_shape = 1
     
    ## -------------------------------------------------------
    ##                  Set initial values
@@ -133,17 +142,14 @@ if __name__ == "__main__":
    
    
    theta_c = initial_values['theta_c']
-   sigma_loc0 = initial_values['sigma_loc0']
    sbeta_loc0 = initial_values['sbeta_loc0']
-   sigma_loc1 = initial_values['sigma_loc1']
    sbeta_loc1 = initial_values['sbeta_loc1']
-   sigma_scale = initial_values['sigma_scale']
    sbeta_scale = initial_values['sbeta_scale']
-   sigma_shape = initial_values['sigma_shape']
    sbeta_shape = initial_values['sbeta_shape']
    
    Cluster_which = initial_values['Cluster_which']
    S_clusters = initial_values['S_clusters']
+   betaCluster_which = initial_values['betaCluster_which']
    
    # Bookkeeping
    n_s = Y.shape[0]
@@ -175,35 +181,36 @@ if __name__ == "__main__":
    # # d = eig_Cor[0]
    # cholesky_inv_all = lapack.dposv(Cor,tmp_vec)
    n_clusters = len(S_clusters)
-   from scipy.linalg import cholesky
-   sigma_loc0_cluster_proposal=list()
-   inv_loc0_cluster_proposal=list()
-   for i in np.arange(n_clusters):
-       which_tmp = Cluster_which[i]
-       sigma_loc0_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
-       inv_loc0_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
+   n_beta_clusters = len(betaCluster_which)
    
-   sigma_loc1_cluster_proposal=list()
-   inv_loc1_cluster_proposal=list()
-   for i in np.arange(n_clusters):
-       which_tmp = Cluster_which[i]
-       sigma_loc1_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
-       inv_loc1_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
+   sigma_beta_loc0_cluster_proposal=list()
+   inv_beta_loc0_cluster_proposal=list()
+   for i in np.arange(n_beta_clusters):
+       which_tmp = betaCluster_which[i]
+       sigma_beta_loc0_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
+       inv_beta_loc0_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
+   
+   sigma_beta_loc1_cluster_proposal=list()
+   inv_beta_loc1_cluster_proposal=list()
+   for i in np.arange(n_beta_clusters):
+       which_tmp = betaCluster_which[i]
+       sigma_beta_loc1_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
+       inv_beta_loc1_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
     
-   sigma_scale_cluster_proposal=list()
-   inv_scale_cluster_proposal=list()
-   for i in np.arange(n_clusters):
-       which_tmp = Cluster_which[i]
-       sigma_scale_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
-       inv_scale_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
+   sigma_beta_scale_cluster_proposal=list()
+   inv_beta_scale_cluster_proposal=list()
+   for i in np.arange(n_beta_clusters):
+       which_tmp = betaCluster_which[i]
+       sigma_beta_scale_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
+       inv_beta_scale_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
      
        
-   sigma_shape_cluster_proposal=list()
-   inv_shape_cluster_proposal=list()
-   for i in np.arange(n_clusters):
-       which_tmp = Cluster_which[i]
-       sigma_shape_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
-       inv_shape_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
+   sigma_beta_shape_cluster_proposal=list()
+   inv_beta_shape_cluster_proposal=list()
+   for i in np.arange(n_beta_clusters):
+       which_tmp = betaCluster_which[i]
+       sigma_beta_shape_cluster_proposal.append(np.diag(np.repeat(1, sum(which_tmp))))
+       inv_beta_shape_cluster_proposal.append((np.diag(np.repeat(1, sum(which_tmp))),np.repeat(1,sum(which_tmp))))       
  
    Cor_Z_clusters=list()
    inv_Z_cluster=list()
@@ -221,10 +228,10 @@ if __name__ == "__main__":
    Z_within_thinning = np.empty((n_s,thinning)); Z_within_thinning[:] = np.nan
 
    # Marginal GEV parameters: per location x time
-   loc0_mean = mu_loc0+Design_mat @beta_loc0
-   loc1_mean = mu_loc1+Design_mat @beta_loc1
-   scale_mean = mu_scale+Design_mat @beta_scale
-   shape_mean = mu_shape+Design_mat @beta_shape
+   loc0 = mu_loc0+Design_mat @beta_loc0
+   loc1 = mu_loc1+Design_mat @beta_loc1
+   scale = np.exp(mu_scale+Design_mat @beta_scale)
+   shape = mu_shape+Design_mat @beta_shape
    
    Loc = np.tile(loc0, n_t) + np.tile(loc1, n_t)*np.repeat(Time,n_s)
    Loc = Loc.reshape((n_s,n_t),order='F')
@@ -280,34 +287,43 @@ if __name__ == "__main__":
      mu_shape_trace = np.empty(n_updates_thinned); mu_shape_trace[:] = np.nan
      mu_shape_trace[0] = mu_shape
      
-     sigma_sbeta_loc0_trace = np.empty((2,n_updates_thinned)); sigma_sbeta_loc0_trace[:] = np.nan
-     sigma_sbeta_loc0_trace[:,0] = np.array([sigma_loc0, sbeta_loc0])
-     sigma_sbeta_loc1_trace = np.empty((2,n_updates_thinned)); sigma_sbeta_loc1_trace[:] = np.nan
-     sigma_sbeta_loc1_trace[:,0] = np.array([sigma_loc1, sbeta_loc1])
-     sigma_sbeta_scale_trace = np.empty((2,n_updates_thinned)); sigma_sbeta_scale_trace[:] = np.nan
-     sigma_sbeta_scale_trace[:,0] = np.array([sigma_scale, sbeta_scale])
-     sigma_sbeta_shape_trace = np.empty((2,n_updates_thinned)); sigma_sbeta_shape_trace[:] = np.nan
-     sigma_sbeta_shape_trace[:,0] = np.array([sigma_shape, sbeta_shape])
+     sigma_sbeta_loc0_trace = np.empty(n_updates_thinned); sigma_sbeta_loc0_trace[:] = np.nan
+     sigma_sbeta_loc0_trace[0] = sbeta_loc0
+     sigma_sbeta_loc1_trace = np.empty(n_updates_thinned); sigma_sbeta_loc1_trace[:] = np.nan
+     sigma_sbeta_loc1_trace[0] = sbeta_loc1
+     sigma_sbeta_scale_trace = np.empty(n_updates_thinned); sigma_sbeta_scale_trace[:] = np.nan
+     sigma_sbeta_scale_trace[0] = sbeta_scale
+     sigma_sbeta_shape_trace = np.empty(n_updates_thinned); sigma_sbeta_shape_trace[:] = np.nan
+     sigma_sbeta_shape_trace[0] = sbeta_shape
          
-     loc0_within_thinning = np.empty((n_s,thinning)); loc0_within_thinning[:] = np.nan
-     loc1_within_thinning = np.empty((n_s,thinning)); loc1_within_thinning[:] = np.nan
-     scale_within_thinning = np.empty((n_s,thinning)); scale_within_thinning[:] = np.nan
-     shape_within_thinning = np.empty((n_s,thinning)); shape_within_thinning[:] = np.nan
+     beta_loc0_within_thinning = np.empty((n_covariates,thinning)); beta_loc0_within_thinning[:] = np.nan
+     beta_loc1_within_thinning = np.empty((n_covariates,thinning)); beta_loc1_within_thinning[:] = np.nan
+     beta_scale_within_thinning = np.empty((n_covariates,thinning)); beta_scale_within_thinning[:] = np.nan
+     beta_shape_within_thinning = np.empty((n_covariates,thinning)); beta_shape_within_thinning[:] = np.nan
    
      delta_accept = 0
      tau_sqd_accept = 0
      theta_c_accept = 0
      
-     loc0_accept = np.repeat(0,n_clusters)
-     loc1_accept = np.repeat(0,n_clusters)
-     scale_accept = np.repeat(0,n_clusters)
-     shape_accept = np.repeat(0,n_clusters)
+     beta_loc0_accept = np.repeat(0,n_beta_clusters)
+     beta_loc1_accept = np.repeat(0,n_beta_clusters)
+     beta_scale_accept = np.repeat(0,n_beta_clusters)
+     beta_shape_accept = np.repeat(0,n_beta_clusters)
      
-     XtX = np.matmul(Design_mat.T, Design_mat)
-     D_sigma_loc0_inv = np.concatenate((np.repeat(1/sbeta_loc0,97), np.repeat(0.0025,2)))
-     D_sigma_loc1_inv = np.concatenate((np.repeat(1/sbeta_loc1,97), np.repeat(0.0025,2)))
-     D_sigma_scale_inv = np.concatenate((np.repeat(1/sbeta_scale,97), np.repeat(0.0025,2)))
-     D_sigma_shape_inv = np.concatenate((np.repeat(1/sbeta_shape,97), np.repeat(0.0025,2)))
+     mu_loc0_accept = 0
+     mu_loc1_accept = 0
+     mu_scale_accept = 0
+     mu_shape_accept = 0
+     
+     sbeta_loc0_accept = 0
+     sbeta_loc1_accept = 0
+     sbeta_scale_accept = 0
+     sbeta_shape_accept = 0
+     # XtX = np.matmul(Design_mat.T, Design_mat)
+     # D_sigma_loc0_inv = np.concatenate((np.repeat(1/sbeta_loc0,97), np.repeat(0.0025,2)))
+     # D_sigma_loc1_inv = np.concatenate((np.repeat(1/sbeta_loc1,97), np.repeat(0.0025,2)))
+     # D_sigma_scale_inv = np.concatenate((np.repeat(1/sbeta_scale,97), np.repeat(0.0025,2)))
+     # D_sigma_shape_inv = np.concatenate((np.repeat(1/sbeta_shape,97), np.repeat(0.0025,2)))
     
     
     
@@ -408,104 +424,122 @@ if __name__ == "__main__":
                    Cor_Z_clusters.append(Cor_tmp)
                    inv_Z_cluster.append(cholesky_inv)
            
-           # Update loc0
-           for cluster_num in np.arange(n_clusters):
-               loc0_accept[cluster_num] += utils.update_loc0_GEV_one_cluster_interp(loc0, Cluster_which, cluster_num, sigma_loc0, inv_loc0_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            loc1, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above, loc0_mean,
-                                                                            sigma_m_loc0_cluster[cluster_num], random_generator)
-           loc0_within_thinning[:, index_within] = loc0
+           # Update mu_loc0 and beta_loc0
+           Metr_mu_loc0 = sampler.static_metr(Y, mu_loc0, utils.mu_loc0_vec_gev_update_mixture_me_likelihood_interp, priors.interval_unif,
+                   hyper_params_mu_loc0, 2,
+                   random_generator,
+                   np.nan, sigma_m['mu_loc0'], False,
+                   Design_mat, beta_loc0, sbeta_loc0, X_s, cen, cen_above, prob_below, prob_above,
+                   delta, tau_sqd, loc1, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above)
+           mu_loc0_accept = mu_loc0_accept + Metr_mu_loc0['acc_prob']
+           mu_loc0 = Metr_mu_loc0['trace'][0,1]
+
+           for cluster_num in np.arange(n_beta_clusters):
+               beta_loc0_accept[cluster_num] += utils.update_beta_loc0_GEV_one_cluster_interp(beta_loc0, betaCluster_which, cluster_num, inv_beta_loc0_cluster_proposal,
+                                                                            Design_mat, mu_loc0, sbeta_loc0, Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            loc1, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above, 
+                                                                            sigma_m_beta_loc0_cluster[cluster_num], random_generator)
+           beta_loc0_within_thinning[:, index_within] = beta_loc0
+           loc0 = mu_loc0+Design_mat @beta_loc0
            
-           # Update loc1
-           for cluster_num in np.arange(n_clusters):
-               loc1_accept[cluster_num] += utils.update_loc1_GEV_one_cluster_interp(loc1, Cluster_which, cluster_num, sigma_loc1, inv_loc1_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            loc0, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above, loc1_mean,
-                                                                            sigma_m_loc1_cluster[cluster_num], random_generator)
-           loc1_within_thinning[:, index_within] = loc1
+           
+           # Update mu_loc1 and beta_loc1
+           Metr_mu_loc1 = sampler.static_metr(Y, mu_loc1, utils.mu_loc1_vec_gev_update_mixture_me_likelihood_interp, priors.interval_unif,
+                   hyper_params_mu_loc1, 2,
+                   random_generator,
+                   np.nan, sigma_m['mu_loc1'], False,
+                   Design_mat, beta_loc1, sbeta_loc1, X_s, cen, cen_above, prob_below, prob_above,
+                   delta, tau_sqd, loc0, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above)
+           mu_loc1_accept = mu_loc1_accept + Metr_mu_loc1['acc_prob']
+           mu_loc1 = Metr_mu_loc1['trace'][0,1]
+           
+           for cluster_num in np.arange(n_beta_clusters):
+               beta_loc1_accept[cluster_num] += utils.update_beta_loc1_GEV_one_cluster_interp(beta_loc1, betaCluster_which, cluster_num, inv_beta_loc1_cluster_proposal,
+                                                                            Design_mat, mu_loc1, sbeta_loc1, Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            loc0, Scale, Shape, Time, xp, den_p, thresh_X, thresh_X_above,
+                                                                            sigma_m_beta_loc1_cluster[cluster_num], random_generator)
+           beta_loc1_within_thinning[:, index_within] = beta_loc1
+           loc1 = mu_loc1+Design_mat @beta_loc1
            Loc = np.tile(loc0, n_t) + np.tile(loc1, n_t)*np.repeat(Time,n_s)
            Loc = Loc.reshape((n_s,n_t),order='F')
            
-           # Update scale
-           for cluster_num in np.arange(n_clusters):
-               scale_accept[cluster_num] += utils.update_scale_GEV_one_cluster_interp(scale, Cluster_which, cluster_num, sigma_scale, inv_scale_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            Loc, Shape, Time, xp, den_p, thresh_X, thresh_X_above, scale_mean,
-                                                                            sigma_m_scale_cluster[cluster_num], random_generator)
-           scale_within_thinning[:, index_within] = np.log(scale)
+           # Update mu_scale and beta_scale
+           Metr_mu_scale = sampler.static_metr(Y, mu_scale, utils.mu_scale_vec_gev_update_mixture_me_likelihood_interp, priors.interval_unif,
+                   hyper_params_mu_scale, 2,
+                   random_generator,
+                   np.nan, sigma_m['mu_scale'], False,
+                   Design_mat, beta_scale, sbeta_scale, X_s, cen, cen_above, prob_below, prob_above,
+                   delta, tau_sqd, Loc, Shape, Time, xp, den_p, thresh_X, thresh_X_above)
+           mu_scale_accept = mu_scale_accept + Metr_mu_scale['acc_prob']
+           mu_scale = Metr_mu_scale['trace'][0,1]
+           
+           for cluster_num in np.arange(n_beta_clusters):
+               beta_scale_accept[cluster_num] += utils.update_beta_scale_GEV_one_cluster_interp(beta_scale, betaCluster_which, cluster_num, inv_beta_scale_cluster_proposal,
+                                                                            Design_mat, mu_scale, sbeta_scale, Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            Loc, Shape, Time, xp, den_p, thresh_X, thresh_X_above, 
+                                                                            sigma_m_beta_scale_cluster[cluster_num], random_generator)
+           beta_scale_within_thinning[:, index_within] = beta_scale
+           scale = np.exp(mu_scale+Design_mat @beta_scale)
            Scale = np.tile(scale, n_t)
            Scale = Scale.reshape((n_s,n_t),order='F')
             
             
-           # Update shape
-           for cluster_num in np.arange(n_clusters):
-               shape_accept[cluster_num] += utils.update_shape_GEV_one_cluster_interp(shape, Cluster_which, cluster_num, sigma_shape, inv_shape_cluster_proposal,
-                                                                            Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
-                                                                            Loc, Scale, Time, xp, den_p, thresh_X, thresh_X_above, shape_mean,
-                                                                            sigma_m_shape_cluster[cluster_num], random_generator)
-           shape_within_thinning[:, index_within] = shape
+           # Update beta_scale and beta_shape
+           Metr_mu_shape = sampler.static_metr(Y, mu_shape, utils.mu_shape_vec_gev_update_mixture_me_likelihood_interp, priors.interval_unif,
+                   hyper_params_mu_shape, 2,
+                   random_generator,
+                   np.nan, sigma_m['mu_shape'], False,
+                   Design_mat, beta_shape, sbeta_shape, X_s, cen, cen_above, prob_below, prob_above,
+                   delta, tau_sqd, Loc, Scale, Time, xp, den_p, thresh_X, thresh_X_above)
+           mu_shape_accept = mu_shape_accept + Metr_mu_shape['acc_prob']
+           mu_shape = Metr_mu_shape['trace'][0,1]
+           
+           for cluster_num in np.arange(n_beta_clusters):
+               beta_shape_accept[cluster_num] += utils.update_beta_shape_GEV_one_cluster_interp(beta_shape, betaCluster_which, cluster_num, inv_beta_shape_cluster_proposal,
+                                                                            Design_mat, mu_shape, sbeta_shape, Y, X_s, cen, cen_above, prob_below, prob_above, delta, tau_sqd,
+                                                                            Loc, Scale, Time, xp, den_p, thresh_X, thresh_X_above,
+                                                                            sigma_m_beta_shape_cluster[cluster_num], random_generator)
+           beta_shape_within_thinning[:, index_within] = beta_shape
+           shape = mu_shape+Design_mat @beta_shape
            Shape = np.tile(shape, n_t)
            Shape = Shape.reshape((n_s,n_t),order='F')
            
-           # Update mu_loc0 and beta_loc0
-           mu_loc0 = norm.rvs(loc = np.mean(loc0 - Design_mat @beta_loc0), scale = np.sqrt(sigma_loc0/n_s))
+           # Update sbeta_loc0
+           Metr_sbeta_loc0 = sampler.static_metr(beta_loc0, sbeta_loc0, utils.dmvn_diag, priors.half_cauchy,
+                   hyper_params_sbeta_loc0, 2,
+                   random_generator,
+                   np.nan, sigma_m['sbeta_loc0'], False,
+                   0)
+           sbeta_loc0_accept = sbeta_loc0_accept + Metr_sbeta_loc0['acc_prob']
+           sbeta_loc0 = Metr_sbeta_loc0['trace'][0,1]
            
-           new_U_loc0 = cholesky(D_sigma_loc0_inv + XtX/sigma_loc0)  
-           beta_tmp = np.linalg.solve(new_U_loc0.T, Design_mat.T @(loc0 - mu_loc0)) + norm.rvs(size=99)
-           beta_loc0 = np.linalg.solve(new_U_loc0, beta_tmp)
+           # Update sbeta_loc1
+           Metr_sbeta_loc1 = sampler.static_metr(beta_loc1, sbeta_loc1, utils.dmvn_diag, priors.half_cauchy,
+                   hyper_params_sbeta_loc1, 2,
+                   random_generator,
+                   np.nan, sigma_m['sbeta_loc1'], False,
+                   0)
+           sbeta_loc1_accept = sbeta_loc1_accept + Metr_sbeta_loc1['acc_prob']
+           sbeta_loc1 = Metr_sbeta_loc1['trace'][0,1]
            
-           loc0_mean = mu_loc0+Design_mat @beta_loc0
+           # Update sbeta_scale
+           Metr_sbeta_scale = sampler.static_metr(beta_scale, sbeta_scale, utils.dmvn_diag, priors.half_cauchy,
+                   hyper_params_sbeta_scale, 2,
+                   random_generator,
+                   np.nan, sigma_m['sbeta_scale'], False,
+                   0)
+           sbeta_scale_accept = sbeta_scale_accept + Metr_sbeta_scale['acc_prob']
+           sbeta_scale = Metr_sbeta_scale['trace'][0,1]
            
-           # Update sigma_loc0 and sbeta_loc0
-           # sigma_loc0 = invgamma.rvs(2517,loc=0, scale=sum((loc0-loc0_mean)**2)/2, size=1)
-           # sbeta_loc0 = invgamma.rvs(2049,loc=0, scale=sum(beta_loc0[0:97]**2)/2+0.5, size=1)
-           D_sigma_loc0_inv = np.concatenate((np.repeat(1/sbeta_loc0,97), np.repeat(0.0025,2)))
+           # Update sbeta_shape
+           Metr_sbeta_shape = sampler.static_metr(beta_shape, sbeta_shape, utils.dmvn_diag, priors.half_cauchy,
+                   hyper_params_sbeta_shape, 2,
+                   random_generator,
+                   np.nan, sigma_m['sbeta_shape'], False,
+                   0)
+           sbeta_shape_accept = sbeta_shape_accept + Metr_sbeta_shape['acc_prob']
+           sbeta_shape = Metr_sbeta_shape['trace'][0,1]
            
-           
-           # Update mu_loc1 and beta_loc1
-           mu_loc1 = norm.rvs(loc = np.mean(loc1 - Design_mat @beta_loc1), scale = np.sqrt(sigma_loc1/n_s))
-           
-           new_U_loc1 = cholesky(D_sigma_loc1_inv + XtX/sigma_loc1)  
-           beta_tmp = np.linalg.solve(new_U_loc1.T, Design_mat.T @(loc1 - mu_loc1)) + norm.rvs(size=99)
-           beta_loc1 = np.linalg.solve(new_U_loc1, beta_tmp)
-           
-           loc1_mean = mu_loc1+Design_mat @beta_loc1
-           
-           # Update sigma_loc1 and sbeta_loc1
-           # sigma_loc1 = invgamma.rvs(2517,loc=0, scale=sum((loc1-loc1_mean)**2)/2, size=1)
-           # sbeta_loc1 = invgamma.rvs(2049,loc=0, scale=sum(beta_loc1[0:97]**2)/2+0.5, size=1)
-           D_sigma_loc1_inv = np.concatenate((np.repeat(1/sbeta_loc1,97), np.repeat(0.0025,2)))
-           
-           
-           # Update mu_scale and beta_scale
-           mu_scale = norm.rvs(loc = np.mean(np.log(scale) - Design_mat @beta_scale), scale = np.sqrt(sigma_scale/n_s))
-           
-           new_U_scale = cholesky(D_sigma_scale_inv + XtX/sigma_scale)  
-           beta_tmp = np.linalg.solve(new_U_scale.T, Design_mat.T @(scale - mu_scale)) + norm.rvs(size=99)
-           beta_scale = np.linalg.solve(new_U_scale, beta_tmp)
-           
-           scale_mean = mu_scale+Design_mat @beta_scale
-           
-           # Update sigma_scale and sbeta_scale
-           # sigma_scale = invgamma.rvs(2517,loc=0, scale=sum((np.log(scale)-scale_mean)**2)/2, size=1)
-           # sbeta_scale = invgamma.rvs(2049,loc=0, scale=sum(beta_scale[0:97]**2)/2+0.5, size=1)
-           D_sigma_scale_inv = np.concatenate((np.repeat(1/sbeta_scale,97), np.repeat(0.0025,2)))
-           
-           
-           # Update mu_shape and beta_shape
-           mu_shape = norm.rvs(loc = np.mean(shape - Design_mat @beta_shape), scale = np.sqrt(sigma_shape/n_s))
-           
-           new_U_shape = cholesky(D_sigma_shape_inv + XtX/sigma_shape)  
-           beta_tmp = np.linalg.solve(new_U_shape.T, Design_mat.T @(shape - mu_shape)) + norm.rvs(size=99)
-           beta_shape = np.linalg.solve(new_U_shape, beta_tmp)
-           
-           shape_mean = mu_shape+Design_mat @beta_shape
-            
-           # Update sigma_shape and sbeta_shape
-           # sigma_shape = invgamma.rvs(2517,loc=0, scale=sum((shape-shape_mean)**2)/2, size=1)
-           # sbeta_shape = invgamma.rvs(2049,loc=0, scale=sum(beta_shape[0:97]**2)/2+0.5, size=1)
-           D_sigma_shape_inv = np.concatenate((np.repeat(1/sbeta_shape,97), np.repeat(0.0025,2)))
-          
            # cen[:] = utils.which_censored(Y, Loc, Scale, Shape, prob_below)
            # cen_above[:] = utils.which_censored(Y, Loc, Scale, Shape, prob_above)
            
@@ -546,10 +580,10 @@ if __name__ == "__main__":
                beta_loc1_trace[:,index] = beta_loc1
                beta_scale_trace[:,index] = beta_scale
                beta_shape_trace[:,index] = beta_shape
-               sigma_sbeta_loc0_trace[:,index] = np.array([sigma_loc0,sbeta_loc0])
-               sigma_sbeta_loc1_trace[:,index] = np.array([sigma_loc1,sbeta_loc1])
-               sigma_sbeta_scale_trace[:,index] = np.array([sigma_scale,sbeta_scale])
-               sigma_sbeta_shape_trace[:,index] = np.array([sigma_shape,sbeta_shape])
+               sigma_sbeta_loc0_trace[index] = sbeta_loc0
+               sigma_sbeta_loc1_trace[index] = sbeta_loc1
+               sigma_sbeta_scale_trace[index] = sbeta_scale
+               sigma_sbeta_shape_trace[index] = sbeta_shape
                
                mu_loc0_trace[index] = mu_loc0
                mu_loc1_trace[index] = mu_loc1
@@ -596,43 +630,62 @@ if __name__ == "__main__":
                        print("Oops. Proposal covariance matrix is now:\n")
                        print(prop_sigma['theta_c'])
                        
-               sigma_m_loc0_cluster[:] = np.exp(np.log(sigma_m_loc0_cluster) + gamma1*(loc0_accept/thinning - r_opt_md))
-               loc0_accept[:] = np.repeat(0,n_clusters)
-               inv_loc0_cluster_proposal=list()
-               for i in np.arange(n_clusters):
-                   which_tmp = Cluster_which[i]
-                   sigma_loc0_cluster_proposal[i] = sigma_loc0_cluster_proposal[i] + gamma2*(np.cov(loc0_within_thinning[which_tmp,:]) - sigma_loc0_cluster_proposal[i])
-                   inv_loc0_cluster_proposal.append((cholesky(sigma_loc0_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))
+               sigma_m_beta_loc0_cluster[:] = np.exp(np.log(sigma_m_beta_loc0_cluster) + gamma1*(beta_loc0_accept/thinning - r_opt_md))
+               beta_loc0_accept[:] = np.repeat(0,n_beta_clusters)
+               inv_beta_loc0_cluster_proposal=list()
+               for i in np.arange(n_beta_clusters):
+                   which_tmp = betaCluster_which[i]
+                   sigma_beta_loc0_cluster_proposal[i] = sigma_beta_loc0_cluster_proposal[i] + gamma2*(np.cov(beta_loc0_within_thinning[which_tmp,:]) - sigma_beta_loc0_cluster_proposal[i])
+                   inv_beta_loc0_cluster_proposal.append((cholesky(sigma_beta_loc0_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))
                    
-               # print(' Done with '+str(index)+", mean accept="+str(np.mean(loc0_accept))+", mean sigma_m_loc0="+str(np.mean(sigma_m_loc0_cluster))+",\n")
+               # print(' Done with '+str(index)+", mean accept="+str(np.mean(loc0_accept))+", mean sigma_m_loc0="+str(np.mean(sigma_m_beta_loc0_cluster))+",\n")
+               sigma_m['mu_loc0'] = np.exp(np.log(sigma_m['mu_loc0']) + gamma1*(mu_loc0_accept/thinning - r_opt_1d))
+               mu_loc0_accept = 0
                
-               sigma_m_loc1_cluster[:] = np.exp(np.log(sigma_m_loc1_cluster) + gamma1*(loc1_accept/thinning - r_opt_md))
-               loc1_accept[:] = np.repeat(0,n_clusters)
-               inv_loc1_cluster_proposal=list()
-               for i in np.arange(n_clusters):
-                   which_tmp = Cluster_which[i]
-                   sigma_loc1_cluster_proposal[i] = sigma_loc1_cluster_proposal[i] + gamma2*(np.cov(loc1_within_thinning[which_tmp,:]) - sigma_loc1_cluster_proposal[i])
-                   inv_loc1_cluster_proposal.append((cholesky(sigma_loc1_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))           
+               sigma_m_beta_loc1_cluster[:] = np.exp(np.log(sigma_m_beta_loc1_cluster) + gamma1*(beta_loc1_accept/thinning - r_opt_md))
+               beta_loc1_accept[:] = np.repeat(0,n_beta_clusters)
+               inv_beta_loc1_cluster_proposal=list()
+               for i in np.arange(n_beta_clusters):
+                   which_tmp = betaCluster_which[i]
+                   sigma_beta_loc1_cluster_proposal[i] = sigma_beta_loc1_cluster_proposal[i] + gamma2*(np.cov(beta_loc1_within_thinning[which_tmp,:]) - sigma_beta_loc1_cluster_proposal[i])
+                   inv_beta_loc1_cluster_proposal.append((cholesky(sigma_beta_loc1_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))           
              
+               sigma_m['mu_loc1'] = np.exp(np.log(sigma_m['mu_loc1']) + gamma1*(mu_loc1_accept/thinning - r_opt_1d))
+               mu_loc1_accept = 0
                
-               sigma_m_scale_cluster[:] = np.exp(np.log(sigma_m_scale_cluster) + gamma1*(scale_accept/thinning - r_opt_md))
-               scale_accept[:] = np.repeat(0,n_clusters)
-               inv_scale_cluster_proposal=list()
-               for i in np.arange(n_clusters):
-                   which_tmp = Cluster_which[i]
-                   sigma_scale_cluster_proposal[i] = sigma_scale_cluster_proposal[i] + gamma2*(np.cov(scale_within_thinning[which_tmp,:]) - sigma_scale_cluster_proposal[i])
-                   inv_scale_cluster_proposal.append((cholesky(sigma_scale_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))
+               sigma_m_beta_scale_cluster[:] = np.exp(np.log(sigma_m_beta_scale_cluster) + gamma1*(beta_scale_accept/thinning - r_opt_md))
+               beta_scale_accept[:] = np.repeat(0,n_beta_clusters)
+               inv_beta_scale_cluster_proposal=list()
+               for i in np.arange(n_beta_clusters):
+                   which_tmp = betaCluster_which[i]
+                   sigma_beta_scale_cluster_proposal[i] = sigma_beta_scale_cluster_proposal[i] + gamma2*(np.cov(beta_scale_within_thinning[which_tmp,:]) - sigma_beta_scale_cluster_proposal[i])
+                   inv_beta_scale_cluster_proposal.append((cholesky(sigma_beta_scale_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))
  
+               sigma_m['mu_scale'] = np.exp(np.log(sigma_m['mu_scale']) + gamma1*(mu_scale_accept/thinning - r_opt_1d))
+               mu_scale_accept = 0
                
-               sigma_m_shape_cluster[:] = np.exp(np.log(sigma_m_shape_cluster) + gamma1*(shape_accept/thinning - r_opt_md))
-               shape_accept[:] = np.repeat(0,n_clusters)
-               inv_shape_cluster_proposal=list()
-               for i in np.arange(n_clusters):
-                   which_tmp = Cluster_which[i]
-                   sigma_shape_cluster_proposal[i] = sigma_shape_cluster_proposal[i] + gamma2*(np.cov(shape_within_thinning[which_tmp,:]) - sigma_shape_cluster_proposal[i])
-                   inv_shape_cluster_proposal.append((cholesky(sigma_shape_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))    
+               sigma_m_beta_shape_cluster[:] = np.exp(np.log(sigma_m_beta_shape_cluster) + gamma1*(beta_shape_accept/thinning - r_opt_md))
+               beta_shape_accept[:] = np.repeat(0,n_beta_clusters)
+               inv_beta_shape_cluster_proposal=list()
+               for i in np.arange(n_beta_clusters):
+                   which_tmp = betaCluster_which[i]
+                   sigma_beta_shape_cluster_proposal[i] = sigma_beta_shape_cluster_proposal[i] + gamma2*(np.cov(beta_shape_within_thinning[which_tmp,:]) - sigma_beta_shape_cluster_proposal[i])
+                   inv_beta_shape_cluster_proposal.append((cholesky(sigma_beta_shape_cluster_proposal[i],lower=False),np.repeat(1,np.sum(which_tmp))))    
                    
+               sigma_m['mu_shape'] = np.exp(np.log(sigma_m['mu_shape']) + gamma1*(mu_shape_accept/thinning - r_opt_1d))
+               mu_shape_accept = 0
                
+               sigma_m['sbeta_loc0'] = np.exp(np.log(sigma_m['sbeta_loc0']) + gamma1*(sbeta_loc0_accept/thinning - r_opt_1d))
+               sbeta_loc0_accept = 0
+               
+               sigma_m['sbeta_loc1'] = np.exp(np.log(sigma_m['sbeta_loc1']) + gamma1*(sbeta_loc1_accept/thinning - r_opt_1d))
+               sbeta_loc1_accept = 0
+               
+               sigma_m['sbeta_scale'] = np.exp(np.log(sigma_m['sbeta_scale']) + gamma1*(sbeta_scale_accept/thinning - r_opt_1d))
+               sbeta_scale_accept = 0
+               
+               sigma_m['sbeta_scale'] = np.exp(np.log(sigma_m['sbeta_scale']) + gamma1*(sbeta_scale_accept/thinning - r_opt_1d))
+               sbeta_scale_accept = 0
           
        # ----------------------------------------------------------------------------------------
        # -------------------------- Echo & save every 'thinning' steps --------------------------
@@ -666,16 +719,13 @@ if __name__ == "__main__":
                     'mu_loc1':mu_loc1,
                     'mu_scale':mu_scale,
                     'mu_shape':mu_shape,
-                    'sigma_loc0':sigma_loc0,
-                    'sigma_loc1':sigma_loc1,
-                    'sigma_scale':sigma_scale,
-                    'sigma_shape':sigma_shape,
                     'sbeta_loc0':sbeta_loc0,
                     'sbeta_loc1':sbeta_loc1,
                     'sbeta_scale':sbeta_scale,
                     'sbeta_shape':sbeta_shape,
                     'Cluster_which':Cluster_which,
-                    'S_clusters':S_clusters
+                    'S_clusters':S_clusters,
+                    'betaCluster_which':betaCluster_which
                     }
                with open(filename, 'wb') as f:
                    dump(Y, f)
@@ -715,15 +765,15 @@ if __name__ == "__main__":
                    dump(R_onetime, f)
                    
                    dump(sigma_m_Z_cluster, f)
-                   dump(sigma_m_loc0_cluster, f)
-                   dump(sigma_m_loc1_cluster, f)
-                   dump(sigma_m_scale_cluster, f)
-                   dump(sigma_m_shape_cluster, f)
+                   dump(sigma_m_beta_loc0_cluster, f)
+                   dump(sigma_m_beta_loc1_cluster, f)
+                   dump(sigma_m_beta_scale_cluster, f)
+                   dump(sigma_m_beta_shape_cluster, f)
                    
-                   dump(sigma_loc0_cluster_proposal, f)
-                   dump(sigma_loc1_cluster_proposal, f)
-                   dump(sigma_scale_cluster_proposal, f)
-                   dump(sigma_shape_cluster_proposal, f)
+                   dump(sigma_beta_loc0_cluster_proposal, f)
+                   dump(sigma_beta_loc1_cluster_proposal, f)
+                   dump(sigma_beta_scale_cluster_proposal, f)
+                   dump(sigma_beta_shape_cluster_proposal, f)
                    dump(sigma_Z_cluster_proposal, f)
                    f.close()
                    
@@ -790,29 +840,29 @@ if __name__ == "__main__":
                #-page-3
                fig = plt.figure(figsize = (8.75, 11.75))
                plt.subplot2grid(grid_size, (0,0))
-               plt.plot(sigma_sbeta_loc0_trace[0,:], color='gray', linestyle='solid')
-               plt.ylabel(r'$\sigma^2(loc0)$')
-               plt.subplot2grid(grid_size, (0,1))
-               plt.plot(sigma_sbeta_loc0_trace[1,:], color='gray', linestyle='solid')
+               plt.plot(sigma_sbeta_loc0_trace[:], color='gray', linestyle='solid')
                plt.ylabel(r'$\sigma^2_{\beta}(loc0)$')
-               plt.subplot2grid(grid_size, (1,0))
-               plt.plot(sigma_sbeta_loc1_trace[0,:], color='gray', linestyle='solid')
-               plt.ylabel(r'$\sigma^2(loc1)$')
-               plt.subplot2grid(grid_size, (1,1))
-               plt.plot(sigma_sbeta_loc1_trace[1,:], color='gray', linestyle='solid')
+               plt.subplot2grid(grid_size, (0,1))
+               plt.plot(sigma_sbeta_loc1_trace[:], color='gray', linestyle='solid')
                plt.ylabel(r'$\sigma^2_{\beta}(loc1)$')
-               plt.subplot2grid(grid_size, (2,0))
-               plt.plot(sigma_sbeta_scale_trace[0,:], color='gray', linestyle='solid')
-               plt.ylabel(r'$\sigma^2(scale)$')
-               plt.subplot2grid(grid_size, (2,1))
-               plt.plot(sigma_sbeta_scale_trace[1,:], color='gray', linestyle='solid')
+               plt.subplot2grid(grid_size, (1,0))
+               plt.plot(sigma_sbeta_scale_trace[:], color='gray', linestyle='solid')
                plt.ylabel(r'$\sigma^2_{\beta}(scale)$')
-               plt.subplot2grid(grid_size, (3,0))
-               plt.plot(sigma_sbeta_shape_trace[0,:], color='gray', linestyle='solid')
-               plt.ylabel(r'$\sigma^2(shape)$')
-               plt.subplot2grid(grid_size, (3,1))
-               plt.plot(sigma_sbeta_shape_trace[1,:], color='gray', linestyle='solid')
+               plt.subplot2grid(grid_size, (1,1))
+               plt.plot(sigma_sbeta_shape_trace[:], color='gray', linestyle='solid')
                plt.ylabel(r'$\sigma^2_{\beta}(shape)$')
+               plt.subplot2grid(grid_size, (2,0)) # loc0
+               plt.plot(loc0_trace[:,wh_to_plot_Xs[0]], color='gray', linestyle='solid')
+               plt.ylabel(r'loc0'+'['+str(wh_to_plot_Xs[0])+']')
+               plt.subplot2grid(grid_size, (2,1)) # loc1
+               plt.plot(loc1_trace[:,wh_to_plot_Xs[0]], color='gray', linestyle='solid')
+               plt.ylabel(r'loc1'+'['+str(wh_to_plot_Xs[0])+']')
+               plt.subplot2grid(grid_size, (3,0)) # scale
+               plt.plot(scale_trace[:,wh_to_plot_Xs[0]], color='gray', linestyle='solid')
+               plt.ylabel(r'scale'+'['+str(wh_to_plot_Xs[0])+']')
+               plt.subplot2grid(grid_size, (3,1)) # shape
+               plt.plot(shape_trace[:,wh_to_plot_Xs[0]], color='gray', linestyle='solid')
+               plt.ylabel(r'shape'+'['+str(wh_to_plot_Xs[0])+']')
                plt.tight_layout()
                pdf_pages.savefig(fig)
                plt.close()

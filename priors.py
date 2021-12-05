@@ -86,3 +86,15 @@ def R_prior(params, hyper_params):
 
 ##
 ## --------------------------------------------------------------------- ##
+
+## --------------------------------------------------------------------- ##
+#  Computes a half Cauchy density with scale hyper.params.                #
+from scipy.stats import cauchy
+def half_cauchy(params, hyper_params):
+  sigma = params
+  scale_theta_1 = hyper_params
+  
+  if sigma < 0: return(-np.inf)
+  return(cauchy.logpdf(sigma, scale=scale_theta_1))
+#                                                                         #
+## --------------------------------------------------------------------- ##
