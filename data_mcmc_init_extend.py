@@ -129,10 +129,10 @@ if __name__ == "__main__":
                mu_scale_trace = np.pad(mu_scale_trace, (0, add_length), 'constant', constant_values=np.nan)
                mu_shape_trace = np.pad(mu_shape_trace, (0, add_length), 'constant', constant_values=np.nan)
                
-               sigma_sbeta_loc0_trace = np.pad(sigma_sbeta_loc0_trace, ((0,0),(0,add_length)),'constant', constant_values=np.nan)
-               sigma_sbeta_loc1_trace = np.pad(sigma_sbeta_loc1_trace, ((0,0),(0,add_length)),'constant', constant_values=np.nan)
-               sigma_sbeta_scale_trace = np.pad(sigma_sbeta_scale_trace, ((0,0),(0,add_length)),'constant', constant_values=np.nan)
-               sigma_sbeta_shape_trace = np.pad(sigma_sbeta_shape_trace, ((0,0),(0,add_length)),'constant', constant_values=np.nan)
+               sigma_sbeta_loc0_trace = np.pad(sigma_sbeta_loc0_trace, (0, add_length),'constant', constant_values=np.nan)
+               sigma_sbeta_loc1_trace = np.pad(sigma_sbeta_loc1_trace, (0, add_length),'constant', constant_values=np.nan)
+               sigma_sbeta_scale_trace = np.pad(sigma_sbeta_scale_trace, (0, add_length),'constant', constant_values=np.nan)
+               sigma_sbeta_shape_trace = np.pad(sigma_sbeta_shape_trace, (0, add_length),'constant', constant_values=np.nan)
                
                loc0_trace = np.pad(loc0_trace, ((0,add_length),(0,0)),'constant', constant_values=np.nan)
                loc1_trace = np.pad(loc1_trace, ((0,add_length),(0,0)),'constant', constant_values=np.nan)
